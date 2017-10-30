@@ -1,10 +1,13 @@
 package nz.co.trineo.sites;
 
+import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
+import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openqa.selenium.By.name;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -18,13 +21,16 @@ public abstract class EditObjectPage<T> implements Page {
 	private final String prefix;
 	private final String baseURL;
 	private final Map<String, String> fieldToPageField = new HashMap<>();
+	private String id;
+	private final Class<T> clazz;
 
-	public EditObjectPage(final WebDriver driver, final String baseURL, final String prefix,
-			final Map<String, String> fieldToPageField) {
+	@SuppressWarnings("unchecked")
+	public EditObjectPage(final WebDriver driver, final String baseURL) {
+		this.clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 		this.driver = driver;
 		this.baseURL = baseURL;
-		this.prefix = prefix;
-		this.fieldToPageField.putAll(fieldToPageField);
+		this.prefix = getPrefixFor(clazz);
+		this.fieldToPageField.putAll(getFieldMapFor(clazz));
 	}
 
 	protected WebElement getField(final String name) {
@@ -34,7 +40,7 @@ public abstract class EditObjectPage<T> implements Page {
 
 	@Override
 	public String getPageURL() {
-		return baseURL + prefix + "/e";
+		return baseURL + "/" + prefix + "/e" + (isNotBlank(id) ? "?id=" + id : "");
 	}
 
 	public void open() {

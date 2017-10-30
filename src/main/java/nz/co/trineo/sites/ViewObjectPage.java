@@ -1,11 +1,13 @@
 package nz.co.trineo.sites;
 
 import static nz.co.trineo.utils.ModelUtils.fromJSON;
+import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openqa.selenium.By.id;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -23,12 +25,12 @@ public abstract class ViewObjectPage<T> implements Page {
 	private final Class<T> clazz;
 	private final String baseURL;
 
-	public ViewObjectPage(final WebDriver driver, final String baseURL, final Class<T> clazz,
-			final Map<String, String> fieldToPageField) {
+	@SuppressWarnings("unchecked")
+	public ViewObjectPage(final WebDriver driver, final String baseURL) {
 		this.driver = driver;
 		this.baseURL = baseURL;
-		this.clazz = clazz;
-		this.fieldToPageField.putAll(fieldToPageField);
+		this.clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		this.fieldToPageField.putAll(getFieldMapFor(clazz));
 	}
 
 	protected WebElement getField(final String name) {
@@ -38,7 +40,7 @@ public abstract class ViewObjectPage<T> implements Page {
 
 	@Override
 	public String getPageURL() {
-		return baseURL + id;
+		return baseURL + "/" + id;
 	}
 
 	public void open() {

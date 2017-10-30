@@ -62,14 +62,16 @@ public class Salesforce implements Site {
 
 	public static class HomePage implements Page {
 		private final WebDriver driver;
+		private final String baseURL;
 
-		public HomePage(WebDriver driver) {
+		public HomePage(final String baseURL, final WebDriver driver) {
 			this.driver = driver;
+			this.baseURL = baseURL;
 		}
 
 		@Override
 		public String getPageURL() {
-			return "https://ap1.salesforce.com/setup/forcecomHomepage.apexp?setupid=ForceCom";
+			return baseURL + "/setup/forcecomHomepage.apexp?setupid=ForceCom";
 		}
 
 		private WebElement getShowAllTabs() {
@@ -82,25 +84,26 @@ public class Salesforce implements Site {
 		}
 	}
 
-	public static class CasesHomePage extends ObjectHomePage {
-		public CasesHomePage(final WebDriver driver) {
-			super(driver, "https://ap1.salesforce.com/", Case.PREFIX);
+	public static class CasesHomePage extends ObjectHomePage<Case> {
+		public CasesHomePage(final String baseURL, final WebDriver driver) {
+			super(driver, baseURL, Case.PREFIX);
 		}
 	}
 
 	public static class EditCasePage extends EditObjectPage<Case> {
-		public EditCasePage(WebDriver driver) {
-			super(driver, "https://ap1.salesforce.com/", Case.PREFIX, Case.fieldToPageField);
+		public EditCasePage(final String baseURL, final WebDriver driver) {
+			super(driver, baseURL);
 		}
 	}
 
 	public static class ViewCasePage extends ViewObjectPage<Case> {
-		public ViewCasePage(WebDriver driver) {
-			super(driver, "https://ap1.salesforce.com/", Case.class, Case.fieldToPageField);
+		public ViewCasePage(final String baseURL, final WebDriver driver) {
+			super(driver, baseURL);
 		}
 	}
 
 	private final String siteURL;
+	private final String loginURL;
 	private final WebDriver driver;
 
 	public static LoginPage loginPage;
@@ -117,21 +120,22 @@ public class Salesforce implements Site {
 		switch (env) {
 		case PRODUCTION:
 		case DEVELOPER:
-			siteURL = "https://login.salesforce.com/";
+			loginURL = "https://login.salesforce.com/";
 			break;
 		case SANDBOX:
-			siteURL = "https://test.salesforce.com/";
+			loginURL = "https://test.salesforce.com/";
 			break;
 		case CUSTOM:
 		default:
-			siteURL = url;
+			loginURL = url;
 		}
+		siteURL = url;
 		this.driver = driver;
-		loginPage = new LoginPage(siteURL, driver);
-		homePage = new HomePage(driver);
-		casesHomePage = new CasesHomePage(driver);
-		editCasePage = new EditCasePage(driver);
-		viewCasePage = new ViewCasePage(driver);
+		loginPage = new LoginPage(loginURL, driver);
+		homePage = new HomePage(siteURL, driver);
+		casesHomePage = new CasesHomePage(siteURL, driver);
+		editCasePage = new EditCasePage(siteURL, driver);
+		viewCasePage = new ViewCasePage(siteURL, driver);
 	}
 
 	@Override
@@ -141,7 +145,7 @@ public class Salesforce implements Site {
 
 	@Override
 	public void open() {
-		driver.navigate().to(siteURL);
+		driver.navigate().to(loginURL);
 	}
 
 	@Override

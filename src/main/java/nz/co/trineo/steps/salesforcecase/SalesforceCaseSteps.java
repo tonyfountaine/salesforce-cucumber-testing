@@ -5,6 +5,7 @@ import static nz.co.trineo.sites.Salesforce.editCasePage;
 import static nz.co.trineo.sites.Salesforce.homePage;
 import static nz.co.trineo.sites.Salesforce.loginPage;
 import static nz.co.trineo.sites.Salesforce.viewCasePage;
+import static nz.co.trineo.utils.ModelUtils.fromJSON;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -26,7 +27,6 @@ import cucumber.api.java.en.When;
 import nz.co.trineo.model.Case;
 import nz.co.trineo.sites.Salesforce;
 import nz.co.trineo.sites.Salesforce.Environment;
-import nz.co.trineo.utils.ModelUtils;
 
 public class SalesforceCaseSteps {
 	private WebDriver driver;
@@ -36,7 +36,7 @@ public class SalesforceCaseSteps {
 	@Before
 	public void open() {
 		driver = new ChromeDriver();
-		site = new Salesforce(Environment.DEVELOPER, driver);
+		site = new Salesforce(Environment.DEVELOPER, "https://ap1.salesforce.com", driver);
 		site.open();
 		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURL()));
 	}
@@ -72,7 +72,7 @@ public class SalesforceCaseSteps {
 	@When("^I enter the case info$")
 	public void createCase() throws JsonParseException, JsonMappingException, IOException {
 		final InputStream caseResource = getClass().getResourceAsStream("/case.json");
-		final Case c = ModelUtils.fromJSON(caseResource, Case.class);
+		final Case c = fromJSON(caseResource, Case.class);
 		editCasePage.updatePage(c);
 		editCasePage.clickSave();
 		id = editCasePage.getNewId();
