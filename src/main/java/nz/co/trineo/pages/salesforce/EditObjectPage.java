@@ -1,4 +1,4 @@
-package nz.co.trineo.sites;
+package nz.co.trineo.pages.salesforce;
 
 import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import nz.co.trineo.pages.Page;
 
 public abstract class EditObjectPage<T> implements Page {
 	protected final WebDriver driver;

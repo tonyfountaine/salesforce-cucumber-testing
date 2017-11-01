@@ -1,4 +1,4 @@
-package nz.co.trineo.sites;
+package nz.co.trineo.pages.salesforce;
 
 import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
 import static org.openqa.selenium.By.name;
@@ -7,6 +7,8 @@ import java.lang.reflect.ParameterizedType;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import nz.co.trineo.pages.Page;
 
 public abstract class ObjectHomePage<T> implements Page {
 	protected final WebDriver driver;

@@ -1,4 +1,4 @@
-package nz.co.trineo.sites;
+package nz.co.trineo.pages.salesforce;
 
 import static nz.co.trineo.utils.ModelUtils.fromJSON;
 import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
@@ -17,6 +17,8 @@ import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import nz.co.trineo.pages.Page;
 
 public abstract class ViewObjectPage<T> implements Page {
 	private final WebDriver driver;
