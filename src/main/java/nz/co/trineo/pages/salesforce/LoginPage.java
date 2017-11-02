@@ -1,18 +1,26 @@
 package nz.co.trineo.pages.salesforce;
 
-import org.openqa.selenium.By;
+import static org.openqa.selenium.support.PageFactory.initElements;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
 import nz.co.trineo.pages.Page;
 
 public class LoginPage implements Page {
 	private final String siteURL;
-	private final WebDriver driver;
+
+	@FindBy(id = "username")
+	private WebElement usernameInput;
+	@FindBy(id = "password")
+	private WebElement passwordInput;
+	@FindBy(id = "Login")
+	private WebElement loginButton;
 
 	public LoginPage(final String siteURL, final WebDriver driver) {
 		this.siteURL = siteURL;
-		this.driver = driver;
+		initElements(driver, this);
 	}
 
 	@Override
@@ -20,28 +28,16 @@ public class LoginPage implements Page {
 		return siteURL;
 	}
 
-	private WebElement getUsernameInput() {
-		return driver.findElement(By.id("username"));
-	}
-
-	private WebElement getPasswordInput() {
-		return driver.findElement(By.id("password"));
-	}
-
-	private WebElement getLoginButton() {
-		return driver.findElement(By.id("Login"));
-	}
-
 	public void setUsername(final String username) {
-		getUsernameInput().sendKeys(username);
+		usernameInput.sendKeys(username);
 	}
 
 	public void setPassword(final String password) {
-		getPasswordInput().sendKeys(password);
+		passwordInput.sendKeys(password);
 	}
 
 	public void clickLogin() {
-		getLoginButton().click();
+		loginButton.click();
 	}
 
 	public void login(final String username, final String password) {

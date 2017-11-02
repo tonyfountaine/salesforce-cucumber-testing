@@ -4,6 +4,7 @@ import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openqa.selenium.By.name;
+import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 
 import java.lang.reflect.Modifier;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import nz.co.trineo.pages.Page;
@@ -26,6 +28,9 @@ public abstract class EditObjectPage<T> implements Page {
 	private String id;
 	private final Class<T> clazz;
 
+	@FindBy(name = "save")
+	private WebElement saveButton;
+
 	@SuppressWarnings("unchecked")
 	public EditObjectPage(final WebDriver driver, final String baseURL) {
 		this.clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
@@ -33,6 +38,7 @@ public abstract class EditObjectPage<T> implements Page {
 		this.baseURL = baseURL;
 		this.prefix = getPrefixFor(clazz);
 		this.fieldToPageField.putAll(getFieldMapFor(clazz));
+		initElements(driver, this);
 	}
 
 	protected WebElement getField(final String name) {
@@ -50,7 +56,6 @@ public abstract class EditObjectPage<T> implements Page {
 	}
 
 	public void clickSave() {
-		final WebElement saveButton = getField("save");
 		saveButton.click();
 	}
 

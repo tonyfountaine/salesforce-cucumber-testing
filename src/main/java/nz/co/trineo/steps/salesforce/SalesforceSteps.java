@@ -26,11 +26,8 @@ public class SalesforceSteps {
 
 	@Before
 	public void before() {
-		// System.setProperty("webdriver.gecko.driver", "/Users/tonyfountaine/Downloads/geckodriver");
-		// driver = new FirefoxDriver();
-		// System.setProperty("webdriver.chrome.driver", "/Users/tonyfountaine/Downloads/chromedriver");
 		driver = new ChromeDriver();
-		site = new Salesforce(Environment.DEVELOPER, driver);
+		site = new Salesforce(Environment.DEVELOPER, "https://ap1.salesforce.com", driver);
 		site.open();
 		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURL()));
 	}

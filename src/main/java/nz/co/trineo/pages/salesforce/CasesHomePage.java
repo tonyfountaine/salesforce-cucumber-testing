@@ -6,6 +6,6 @@ import nz.co.trineo.model.Case;
 
 public class CasesHomePage extends ObjectHomePage<Case> {
 	public CasesHomePage(final String baseURL, final WebDriver driver) {
-		super(driver, baseURL, Case.PREFIX);
+		super(driver, baseURL);
 	}
 }

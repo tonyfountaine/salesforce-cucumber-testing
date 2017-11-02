@@ -69,7 +69,7 @@ public class Salesforce implements Site {
 	}
 
 	public void waitForHomePage() {
-		final WebDriverWait wait = new WebDriverWait(driver, 6000);
+		final WebDriverWait wait = new WebDriverWait(driver, 60);
 		wait.until(urlToBe(homePage.getPageURL()));
 	}
 }

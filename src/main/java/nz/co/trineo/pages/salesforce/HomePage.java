@@ -1,18 +1,22 @@
 package nz.co.trineo.pages.salesforce;
 
-import org.openqa.selenium.By;
+import static org.openqa.selenium.support.PageFactory.initElements;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 
 import nz.co.trineo.pages.Page;
 
 public class HomePage implements Page {
-	private final WebDriver driver;
 	private final String baseURL;
 
+	@FindBy(css = "li#AllTab_Tab a")
+	private WebElement showAllTabs;
+
 	public HomePage(final String baseURL, final WebDriver driver) {
-		this.driver = driver;
 		this.baseURL = baseURL;
+		initElements(driver, this);
 	}
 
 	@Override
@@ -20,12 +24,7 @@ public class HomePage implements Page {
 		return baseURL + "/setup/forcecomHomepage.apexp?setupid=ForceCom";
 	}
 
-	private WebElement getShowAllTabs() {
-		return driver.findElement(By.cssSelector("li#AllTab_Tab a"));
-	}
-
 	public void showAllTabs() {
-		WebElement showAllTabs = getShowAllTabs();
 		showAllTabs.click();
 	}
 }

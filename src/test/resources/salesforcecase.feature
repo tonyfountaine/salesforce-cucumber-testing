@@ -6,4 +6,4 @@ Scenario: As a user I would like to create a new Case
      And I click Cases tab
     When I click the new button
     When I enter the case info
-    Then I should see the new Case 
+    Then I should see the new Case
