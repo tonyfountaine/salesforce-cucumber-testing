@@ -9,10 +9,15 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.apache.http.client.utils.URIBuilder;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -22,9 +27,9 @@ import nz.co.trineo.pages.Page;
 
 public abstract class EditObjectPage<T> implements Page {
 	protected final WebDriver driver;
-	private final String prefix;
+	protected final String prefix;
 	private final String baseURL;
-	private final Map<String, String> fieldToPageField = new HashMap<>();
+	final Map<String, String> fieldToPageField = new HashMap<>();
 	private String id;
 	private final Class<T> clazz;
 
@@ -42,17 +47,34 @@ public abstract class EditObjectPage<T> implements Page {
 	}
 
 	protected WebElement getField(final String name) {
-		final WebElement fieldElement = driver.findElement(name(name));
-		return fieldElement;
+		try {
+			final WebElement fieldElement = driver.findElement(name(name));
+			return fieldElement;
+		} catch (NoSuchElementException e) {
+			return null;
+		}
 	}
 
 	@Override
-	public String getPageURL() {
-		return baseURL + "/" + prefix + "/e" + (isNotBlank(id) ? "?id=" + id : "");
+	public URI getPageURI() {
+		try {
+			final URIBuilder builder = new URIBuilder(baseURL).setPath(prefix + "/e");
+			if (isNotBlank(id)) {
+				builder.addParameter("id", id);
+			}
+			return builder.build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public void open() {
-		driver.navigate().to(getPageURL());
+		try {
+			driver.navigate().to(getPageURI().toURL());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void clickSave() {
@@ -62,14 +84,6 @@ public abstract class EditObjectPage<T> implements Page {
 	public void waitForViewPage() {
 		final WebDriverWait wait = new WebDriverWait(driver, 6000);
 		wait.until(urlContains(prefix));
-	}
-
-	public String getNewId() {
-		waitForViewPage();
-		String currentUrl = driver.getCurrentUrl();
-		int indexOf = currentUrl.indexOf(prefix);
-		String id = currentUrl.substring(indexOf);
-		return id;
 	}
 
 	public void updatePage(final T model) {

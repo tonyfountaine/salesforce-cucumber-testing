@@ -1,9 +1,9 @@
 package nz.co.trineo.steps.salesforcecase;
 
 import static nz.co.trineo.sites.Salesforce.casesHomePage;
-import static nz.co.trineo.sites.Salesforce.editCasePage;
 import static nz.co.trineo.sites.Salesforce.homePage;
 import static nz.co.trineo.sites.Salesforce.loginPage;
+import static nz.co.trineo.sites.Salesforce.newCasePage;
 import static nz.co.trineo.sites.Salesforce.viewCasePage;
 import static nz.co.trineo.utils.ModelUtils.fromJSON;
 import static org.hamcrest.Matchers.equalTo;
@@ -36,9 +36,9 @@ public class SalesforceCaseSteps {
 	@Before
 	public void open() {
 		driver = new ChromeDriver();
-		site = new Salesforce(Environment.DEVELOPER, "https://ap1.salesforce.com", driver);
+		site = new Salesforce(Environment.SANDBOX, "https://nlg--dev.cs57.my.salesforce.com", driver);
 		site.open();
-		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURL()));
+		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURI().toString()));
 	}
 
 	@After
@@ -56,7 +56,7 @@ public class SalesforceCaseSteps {
 	@Given("^I can see the HomePage$")
 	public void seeHomePage() {
 		site.waitForHomePage();
-		assertThat(driver.getCurrentUrl(), equalTo(homePage.getPageURL()));
+		assertThat(driver.getCurrentUrl(), equalTo(homePage.getPageURI().toString()));
 	}
 
 	@Given("^I click Cases tab$")
@@ -73,9 +73,9 @@ public class SalesforceCaseSteps {
 	public void createCase() throws JsonParseException, JsonMappingException, IOException {
 		final InputStream caseResource = getClass().getResourceAsStream("/case.json");
 		final Case c = fromJSON(caseResource, Case.class);
-		editCasePage.updatePage(c);
-		editCasePage.clickSave();
-		id = editCasePage.getNewId();
+		newCasePage.updatePage(c);
+		newCasePage.clickSave();
+		id = newCasePage.getNewId();
 	}
 
 	@Then("^I should see the new Case$")
@@ -84,5 +84,6 @@ public class SalesforceCaseSteps {
 		viewCasePage.setId(id);
 		final Case actual = viewCasePage.readPage();
 		assertThat(actual.getCaseOrigin(), equalTo("Web"));
+		assertThat(actual.getStatus(), equalTo("In Progress"));
 	}
 }

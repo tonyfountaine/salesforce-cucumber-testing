@@ -4,7 +4,11 @@ import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.lang.reflect.ParameterizedType;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -34,11 +38,20 @@ public abstract class ObjectHomePage<T> implements Page {
 	}
 
 	@Override
-	public String getPageURL() {
-		return baseURL + "/" + prefix + "/o";
+	public URI getPageURI() {
+		try {
+			return new URIBuilder(baseURL).setPath(prefix + "/o").build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public void open() {
-		driver.navigate().to(getPageURL());
+		try {
+			driver.navigate().to(getPageURI().toURL());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 	}
 }

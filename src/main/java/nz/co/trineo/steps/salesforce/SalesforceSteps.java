@@ -29,7 +29,7 @@ public class SalesforceSteps {
 		driver = new ChromeDriver();
 		site = new Salesforce(Environment.DEVELOPER, "https://ap1.salesforce.com", driver);
 		site.open();
-		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURL()));
+		assertThat(driver.getCurrentUrl(), equalTo(loginPage.getPageURI().toString()));
 	}
 
 	@After
@@ -53,7 +53,7 @@ public class SalesforceSteps {
 	@Then("^I should see the Home page$")
 	public void verifyHomePage() {
 		final WebDriverWait wait = new WebDriverWait(driver, 6000);
-		wait.until(ExpectedConditions.urlToBe(homePage.getPageURL()));
-		assertThat(driver.getCurrentUrl(), equalTo(homePage.getPageURL()));
+		wait.until(ExpectedConditions.urlToBe(homePage.getPageURI().toString()));
+		assertThat(driver.getCurrentUrl(), equalTo(homePage.getPageURI().toString()));
 	}
 }

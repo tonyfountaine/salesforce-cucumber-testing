@@ -30,7 +30,7 @@ public class WikipediaSteps implements En {
 		driver = new ChromeDriver();
 		site = new Wikipedia(driver);
 		site.open();
-		assertThat(driver.getCurrentUrl(), equalTo(mainPage.getPageURL()));
+		assertThat(driver.getCurrentUrl(), equalTo(mainPage.getPageURI().toString()));
 	}
 
 	@After
@@ -50,7 +50,7 @@ public class WikipediaSteps implements En {
 
 	@Then("^Single result is shown for '(.*?)'$")
 	public void assertSingleResult(String searchResult) {
-		assertThat(driver.getCurrentUrl(), equalTo(cucumberPage.getPageURL()));
+		assertThat(driver.getCurrentUrl(), equalTo(cucumberPage.getPageURI().toString()));
 		final String pageResults = cucumberPage.getPageResults();
 		assertFalse(pageResults.contains(searchResult + " may refer to:"));
 		assertTrue(pageResults.startsWith(searchResult));

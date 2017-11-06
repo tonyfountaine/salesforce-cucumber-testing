@@ -1,5 +1,9 @@
 package nz.co.trineo.pages.wikipedia;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.http.client.utils.URIBuilder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,8 +20,13 @@ public abstract class WikipediaPage implements Page {
 	}
 
 	@Override
-	public String getPageURL() {
-		return pageURL;
+	public URI getPageURI() {
+		try {
+			return new URIBuilder(pageURL).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String getPageResults() {

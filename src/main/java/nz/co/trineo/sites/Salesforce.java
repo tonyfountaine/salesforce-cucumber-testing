@@ -9,6 +9,7 @@ import nz.co.trineo.pages.salesforce.CasesHomePage;
 import nz.co.trineo.pages.salesforce.EditCasePage;
 import nz.co.trineo.pages.salesforce.HomePage;
 import nz.co.trineo.pages.salesforce.LoginPage;
+import nz.co.trineo.pages.salesforce.NewCasePage;
 import nz.co.trineo.pages.salesforce.ViewCasePage;
 
 public class Salesforce implements Site {
@@ -26,6 +27,7 @@ public class Salesforce implements Site {
 	public static CasesHomePage casesHomePage;
 	public static EditCasePage editCasePage;
 	public static ViewCasePage viewCasePage;
+	public static NewCasePage newCasePage;
 
 	public Salesforce(final Environment env, final WebDriver driver) {
 		this(env, null, driver);
@@ -51,6 +53,7 @@ public class Salesforce implements Site {
 		casesHomePage = new CasesHomePage(siteURL, driver);
 		editCasePage = new EditCasePage(siteURL, driver);
 		viewCasePage = new ViewCasePage(siteURL, driver);
+		newCasePage = new NewCasePage(siteURL, driver);
 	}
 
 	@Override
@@ -70,6 +73,6 @@ public class Salesforce implements Site {
 
 	public void waitForHomePage() {
 		final WebDriverWait wait = new WebDriverWait(driver, 60);
-		wait.until(urlToBe(homePage.getPageURL()));
+		wait.until(urlToBe(homePage.getPageURI().toString()));
 	}
 }

@@ -2,6 +2,10 @@ package nz.co.trineo.pages.salesforce;
 
 import static org.openqa.selenium.support.PageFactory.initElements;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.http.client.utils.URIBuilder;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -24,8 +28,13 @@ public class LoginPage implements Page {
 	}
 
 	@Override
-	public String getPageURL() {
-		return siteURL;
+	public URI getPageURI() {
+		try {
+			return new URIBuilder(siteURL).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public void setUsername(final String username) {
