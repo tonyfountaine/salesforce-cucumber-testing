@@ -12,11 +12,13 @@ public class Case {
 		fieldToPageField.put("caseOrigin", "cas11");
 		fieldToPageField.put("recordTypeId", "p3");
 		fieldToPageField.put("status", "cas7");
+		fieldToPageField.put("description", "cas15");
 	}
 
 	private String caseOrigin;
 	private String recordTypeId;
 	private String status;
+	private String description;
 
 	@SuppressWarnings("unused")
 	private Case() {
@@ -48,5 +50,13 @@ public class Case {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

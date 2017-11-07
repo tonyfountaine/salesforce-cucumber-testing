@@ -1,11 +1,8 @@
 package nz.co.trineo.pages.salesforce;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.stream.Stream;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,18 +30,8 @@ public abstract class NewObjectPage<T> extends EditObjectPage<T> {
 				final String name = "recordTypeId";
 				final Field recordTypeField = model.getClass().getDeclaredField(name);
 				recordTypeField.setAccessible(true);
-				final String fieldName = fieldToPageField.get(name);
-				final WebElement fieldElement = getField(fieldName);
-				if (fieldElement != null) {
-					// fieldElement.clear();
-					final Object value = recordTypeField.get(model);
-					if (value != null) {
-						final String stringValue = value.toString();
-						if (isNotBlank(stringValue)) {
-							fieldElement.sendKeys(stringValue);
-						}
-					}
-				}
+				final Object value = recordTypeField.get(model);
+				setElementValue(name, value);
 				clickContinue();
 				waitForViewPage();
 			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
@@ -53,27 +40,6 @@ public abstract class NewObjectPage<T> extends EditObjectPage<T> {
 			}
 		}
 		super.updatePage(model);
-		Stream.of(model.getClass().getDeclaredFields())
-				.filter(f -> (f.getModifiers() & Modifier.STATIC) != Modifier.STATIC).forEach(f -> {
-					f.setAccessible(true);
-					final String name = f.getName();
-					final String fieldName = fieldToPageField.get(name);
-					final WebElement fieldElement = getField(fieldName);
-					if (fieldElement != null) {
-						// fieldElement.clear();
-						try {
-							final Object value = f.get(model);
-							if (value != null) {
-								final String stringValue = value.toString();
-								if (isNotBlank(stringValue)) {
-									fieldElement.sendKeys(stringValue);
-								}
-							}
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							e.printStackTrace();
-						}
-					}
-				});
 	}
 
 	public String getNewId() {

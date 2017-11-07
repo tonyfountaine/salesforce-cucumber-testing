@@ -2,6 +2,7 @@ package nz.co.trineo.pages.salesforce;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
+import static nz.co.trineo.utils.ModelUtils.STATIC_PREDICATE;
 import static nz.co.trineo.utils.ModelUtils.fromJSON;
 import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -9,7 +10,6 @@ import static org.openqa.selenium.By.id;
 import static org.openqa.selenium.support.PageFactory.initElements;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -84,6 +84,20 @@ public abstract class ViewObjectPage<T> implements Page {
 		this.id = id;
 	}
 
+	private WebElement getElementFor(final String name) {
+		final String fieldName = fieldToPageField.get(name);
+		final WebElement fieldElement = getField(fieldName);
+		return fieldElement;
+	}
+
+	private String getElementValue(final String name) {
+		final WebElement fieldElement = getElementFor(name);
+		if (fieldElement != null) {
+			return fieldElement.getText();
+		}
+		return null;
+	}
+
 	public T readPage() throws JsonParseException, JsonMappingException, IOException {
 		try {
 			// if there is a details tab switch to it, so that we can read the page fields
@@ -94,20 +108,12 @@ public abstract class ViewObjectPage<T> implements Page {
 		}
 
 		final Map<String, String> fieldValues = new HashMap<>();
-		Stream.of(clazz.getDeclaredFields()).filter(f -> (f.getModifiers() & Modifier.STATIC) != Modifier.STATIC)
-				.forEach(f -> {
-					f.setAccessible(true);
-					final String name = f.getName();
-					final String fieldName = fieldToPageField.get(name);
-					final WebElement fieldElement = getField(fieldName);
-					if (fieldElement != null) {
-						final String stringValue = fieldElement.getText();
-						if (isNotBlank(stringValue)) {
-							fieldValues.put(name, stringValue);
-						}
-					}
-				});
-		final String modelString = fieldValues.entrySet().stream()
+		Stream.of(clazz.getDeclaredFields()).filter(STATIC_PREDICATE).forEach(f -> {
+			final String name = f.getName();
+			final String stringValue = getElementValue(name);
+			fieldValues.put(name, stringValue);
+		});
+		final String modelString = fieldValues.entrySet().stream().filter(e -> isNotBlank(e.getValue()))
 				.map(e -> "\"" + e.getKey() + "\":\"" + e.getValue() + "\"")
 				.collect(collectingAndThen(joining(","), (String a) -> "{" + a + "}"));
 		final T model = fromJSON(modelString, clazz);

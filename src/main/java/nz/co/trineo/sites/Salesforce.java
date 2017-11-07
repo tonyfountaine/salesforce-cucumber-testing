@@ -1,5 +1,6 @@
 package nz.co.trineo.sites;
 
+import static nz.co.trineo.sites.Salesforce.Environment.DEVELOPER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlToBe;
 
 import org.openqa.selenium.WebDriver;
@@ -10,6 +11,7 @@ import nz.co.trineo.pages.salesforce.EditCasePage;
 import nz.co.trineo.pages.salesforce.HomePage;
 import nz.co.trineo.pages.salesforce.LoginPage;
 import nz.co.trineo.pages.salesforce.NewCasePage;
+import nz.co.trineo.pages.salesforce.SetupHomePage;
 import nz.co.trineo.pages.salesforce.ViewCasePage;
 
 public class Salesforce implements Site {
@@ -49,7 +51,11 @@ public class Salesforce implements Site {
 		siteURL = url;
 		this.driver = driver;
 		loginPage = new LoginPage(loginURL, driver);
-		homePage = new HomePage(siteURL, driver);
+		if (env == DEVELOPER) {
+			homePage = new SetupHomePage(siteURL, driver);
+		} else {
+			homePage = new HomePage(siteURL, driver);
+		}
 		casesHomePage = new CasesHomePage(siteURL, driver);
 		editCasePage = new EditCasePage(siteURL, driver);
 		viewCasePage = new ViewCasePage(siteURL, driver);

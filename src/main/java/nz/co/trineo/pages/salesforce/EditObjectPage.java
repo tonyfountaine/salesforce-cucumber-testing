@@ -1,18 +1,20 @@
 package nz.co.trineo.pages.salesforce;
 
+import static nz.co.trineo.utils.ModelUtils.STATIC_PREDICATE;
 import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openqa.selenium.By.name;
 import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -21,6 +23,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import nz.co.trineo.pages.Page;
@@ -46,10 +49,10 @@ public abstract class EditObjectPage<T> implements Page {
 		initElements(driver, this);
 	}
 
-	protected WebElement getField(final String name) {
+	protected List<WebElement> getFields(final String name) {
 		try {
-			final WebElement fieldElement = driver.findElement(name(name));
-			return fieldElement;
+			final List<WebElement> fieldElements = driver.findElements(name(name));
+			return fieldElements;
 		} catch (NoSuchElementException e) {
 			return null;
 		}
@@ -86,27 +89,64 @@ public abstract class EditObjectPage<T> implements Page {
 		wait.until(urlContains(prefix));
 	}
 
+	protected List<WebElement> getElementsFor(final String name) {
+		final String fieldName = fieldToPageField.get(name);
+		final List<WebElement> fieldElements = getFields(fieldName);
+		return fieldElements;
+	}
+
+	/**
+	 * Method for setting the value of the found input element. Only handles plain text. May not work correctly for
+	 * select, check boxes, radio buttons and multiselect picklists
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	protected void setElementValue(final String name, final Object value) {
+		if (value == null) {
+			return;
+		}
+		final List<WebElement> fieldElements = getElementsFor(name);
+		if (fieldElements == null || fieldElements.isEmpty()) {
+			return;
+		}
+		final String stringValue = value.toString();
+		if (isBlank(stringValue)) {
+			return;
+		}
+		if (fieldElements.size() == 1) {
+			// only one element so assume input, select textArea
+			final WebElement fieldElement = fieldElements.get(0);
+			final String tagName = fieldElement.getTagName().toLowerCase();
+			if (tagName.equals("input") || tagName.equals("textarea")) {
+				fieldElement.clear();
+				fieldElement.sendKeys(stringValue);
+			} else if (tagName.equals("select")) {
+				final Select select = new Select(fieldElement);
+				select.selectByValue(stringValue);
+			}
+		} else {
+			// more then one element so assume check boxes or radio buttons
+			// could be a comma separated list?
+			fieldElements.forEach(e -> {
+				final String elementValue = e.getAttribute("value");
+				if (elementValue.equals(stringValue)) {
+					e.click();
+				}
+			});
+		}
+	}
+
 	public void updatePage(final T model) {
-		Stream.of(model.getClass().getDeclaredFields())
-				.filter(f -> (f.getModifiers() & Modifier.STATIC) != Modifier.STATIC).forEach(f -> {
-					f.setAccessible(true);
-					final String name = f.getName();
-					final String fieldName = fieldToPageField.get(name);
-					final WebElement fieldElement = getField(fieldName);
-					if (fieldElement != null) {
-						// fieldElement.clear();
-						try {
-							final Object value = f.get(model);
-							if (value != null) {
-								final String stringValue = value.toString();
-								if (isNotBlank(stringValue)) {
-									fieldElement.sendKeys(stringValue);
-								}
-							}
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							e.printStackTrace();
-						}
-					}
-				});
+		Stream.of(model.getClass().getDeclaredFields()).filter(STATIC_PREDICATE).forEach(f -> {
+			f.setAccessible(true);
+			final String name = f.getName();
+			try {
+				final Object value = f.get(model);
+				setElementValue(name, value);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 }

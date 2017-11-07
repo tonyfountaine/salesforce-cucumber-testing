@@ -83,7 +83,8 @@ public class SalesforceCaseSteps {
 		assertThat(id, notNullValue());
 		viewCasePage.setId(id);
 		final Case actual = viewCasePage.readPage();
-		assertThat(actual.getCaseOrigin(), equalTo("Web"));
+		assertThat(actual.getCaseOrigin(), equalTo("Email"));
 		assertThat(actual.getStatus(), equalTo("In Progress"));
+		assertThat(actual.getDescription(), equalTo("Test Description"));
 	}
 }
