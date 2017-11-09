@@ -30,6 +30,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import nz.co.trineo.pages.Page;
 
 public abstract class ViewObjectPage<T> implements Page {
+	private static final String CHECKED_STRING = "Checked";
+	private static final String TITLE_ATTRIBUTE = "title";
+
 	private final WebDriver driver;
 	private String id;
 	private final Map<String, String> fieldToPageField = new HashMap<>();
@@ -48,9 +51,9 @@ public abstract class ViewObjectPage<T> implements Page {
 		initElements(driver, this);
 	}
 
-	protected WebElement getField(final String name) {
+	protected WebElement getElementFor(final String id) {
 		try {
-			final WebElement fieldElement = driver.findElement(id(name + "_ileinner"));
+			final WebElement fieldElement = driver.findElement(id(id));
 			return fieldElement;
 		} catch (NoSuchElementException e) {
 			e.printStackTrace();
@@ -84,15 +87,28 @@ public abstract class ViewObjectPage<T> implements Page {
 		this.id = id;
 	}
 
-	private WebElement getElementFor(final String name) {
+	private WebElement getDivElementFor(final String name) {
 		final String fieldName = fieldToPageField.get(name);
-		final WebElement fieldElement = getField(fieldName);
+		final WebElement fieldElement = getElementFor(fieldName + "_ileinner");
+		return fieldElement;
+	}
+
+	private WebElement getCheckboxElementFor(final String name) {
+		final String fieldName = fieldToPageField.get(name);
+		final WebElement fieldElement = getElementFor(fieldName + "_chkbox");
 		return fieldElement;
 	}
 
 	private String getElementValue(final String name) {
-		final WebElement fieldElement = getElementFor(name);
+		final WebElement fieldElement = getDivElementFor(name);
 		if (fieldElement != null) {
+			final WebElement chkboxField = getCheckboxElementFor(name);
+			if (chkboxField != null) {
+				// is a check box so check if the title attribute equals 'Checked'
+				final String title = chkboxField.getAttribute(TITLE_ATTRIBUTE);
+				final boolean checked = CHECKED_STRING.equals(title);
+				return Boolean.toString(checked);
+			}
 			return fieldElement.getText();
 		}
 		return null;

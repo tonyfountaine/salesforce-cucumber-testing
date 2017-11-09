@@ -1,10 +1,12 @@
 package nz.co.trineo.pages.salesforce;
 
+import static java.util.Arrays.asList;
 import static nz.co.trineo.utils.ModelUtils.STATIC_PREDICATE;
 import static nz.co.trineo.utils.SalesforceUtils.getFieldMapFor;
 import static nz.co.trineo.utils.SalesforceUtils.getPrefixFor;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.split;
 import static org.openqa.selenium.By.name;
 import static org.openqa.selenium.support.PageFactory.initElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
@@ -29,6 +31,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import nz.co.trineo.pages.Page;
 
 public abstract class EditObjectPage<T> implements Page {
+	private static final String CHECKBOX_TYPE = "checkbox";
+	private static final String VALUE_ATTRIBUTE = "value";
+	private static final String SELECT_TAG = "select";
+	private static final String TEXTAREA_TAG = "textarea";
+	private static final String INPUT_TAG = "input";
+	private static final String TYPE_ATTRIBUTE = "type";
+
 	protected final WebDriver driver;
 	protected final String prefix;
 	private final String baseURL;
@@ -118,19 +127,38 @@ public abstract class EditObjectPage<T> implements Page {
 			// only one element so assume input, select textArea
 			final WebElement fieldElement = fieldElements.get(0);
 			final String tagName = fieldElement.getTagName().toLowerCase();
-			if (tagName.equals("input") || tagName.equals("textarea")) {
+			final String type = fieldElement.getAttribute(TYPE_ATTRIBUTE);
+			if (INPUT_TAG.equals(tagName) && CHECKBOX_TYPE.equals(type)) {
+				// is a check box
+				final boolean booleanValue = Boolean.valueOf(stringValue);
+				final boolean selected = fieldElement.isSelected();
+				if (selected != booleanValue) {
+					// the current value of the checkbox is not the same as the specified value, so click it
+					fieldElement.click();
+				}
+			} else if (INPUT_TAG.equals(tagName) || TEXTAREA_TAG.equals(tagName)) {
+				// is a text type of input
 				fieldElement.clear();
 				fieldElement.sendKeys(stringValue);
-			} else if (tagName.equals("select")) {
+			} else if (SELECT_TAG.equals(tagName)) {
+				// is a select
 				final Select select = new Select(fieldElement);
-				select.selectByValue(stringValue);
+				if (select.isMultiple()) {
+					// allows multiple
+					select.deselectAll();
+					Stream.of(split(stringValue, "; ")).forEach(o -> {
+						select.selectByValue(o);
+					});
+				} else {
+					select.selectByValue(stringValue);
+				}
 			}
 		} else {
 			// more then one element so assume check boxes or radio buttons
-			// could be a comma separated list?
+			final List<String> listValue = asList(split(stringValue, "; "));
 			fieldElements.forEach(e -> {
-				final String elementValue = e.getAttribute("value");
-				if (elementValue.equals(stringValue)) {
+				final String elementValue = e.getAttribute(VALUE_ATTRIBUTE);
+				if (listValue.contains(elementValue)) {
 					e.click();
 				}
 			});
